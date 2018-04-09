@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pairwise Sequence Alignment</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="css/style.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
+    <!-- <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon"> -->
+    <style>
+        @import url(http://fonts.googleapis.com/css?family=Amatic+SC:700);
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="js/main.js"></script>
+</head>
+<body>
+    <div class="container">  
+        <div class="header">
+            <h3 class="text-muted">Pairwise Sequence Alignment</h3>
+        </div>
+        <div class="jumbotron">
+            <form class="form-input">
+                <div class="form-group row">
+                    <div class="col-sm-6" >
+                        <div class="form-group row">
+                            <label for="staticEmail" class="col-sm-3 col-form-label">Type</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="type">
+                                    <option value="local">Local Alignment</option>
+                                    <!-- <option value="global">Global Alignment</option> -->
+                                </select> 
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="staticEmail" class="col-sm-3 col-form-label">Sequence 1</label>
+                            <div class="col-sm-9">
+                                <input type="name" name="inputSeq1" id="seq1" class="form-control seq" value="attgctcgttgga" placeholder="Sequence 1" maxlength="20" required autofocus>
+                                <!-- <input type="name" name="inputSeq1" id="seq1" class="form-control seq" value="TGTTACGG" placeholder="Sequence 1" maxlength="20" required autofocus> -->
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-3 col-form-label">Sequence 2</label>
+                            <div class="col-sm-9">
+                                <input type="name" name="inputSeq2" id="seq2" class="form-control seq" value="aaaaccgtaa" placeholder="Sequence 2" maxlength="20" required autofocus>
+                                <!-- <input type="name" name="inputSeq2" id="seq2" class="form-control seq" value="GGTTGACTA" placeholder="Sequence 2" maxlength="20" required autofocus> -->
+                            </div>
+                        </div>
+            
+                        <div class="form-group row">
+                            <label for="score" class="col-sm-3 col-form-label" style="margin-top:40px">Score</label>
+                            <div class="col-sm-9">
+                                <div class="col-md-4 col-sm-4 col-xs-4" style="padding-left:0px">
+                                    <span class="help-block text-muted small-font" > Match</span>
+                                    <input type="number" name="matchScore" id="match" class="form-control" value="2" />
+                                </div>
+                                <div class="col-md-4 col-sm-4 col-xs-4" style="padding-left:0px">
+                                    <span class="help-block text-muted small-font" >  Missmatch</span>
+                                    <input type="number" name="missmatchScore" id="missmatch" class="form-control" value="-1" />
+                                </div>
+                                <div class="col-md-4 col-sm-4 col-xs-4" style="padding-left:0px">
+                                    <span class="help-block text-muted small-font" >  Gap</span>
+                                    <input type="number" name="gapScore" id="gap" class="form-control" value="-1" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6" id="result"></div>
+                </div>
+                <div class="form-group button-section"> 
+                    <div class="col-sm-offset-2 col-sm-2">
+                        <!-- <button id="btnReset" class="btn btn-primary btn-block" type="button">Reset</button> -->
+                    </div>
+                    <div class="col-sm-2">
+                        <!-- <button id="btnCompute" class="btn btn-primary btn-block" type="button">Compute</button> -->
+                        <button id="btnReset" class="btn btn-primary btn-block" type="button">Reset</button>
+                    </div>
+                </div>
+            </form>
+            <!-- <div id="resultss" style="margin-top:50px">
+            </div> -->
+            <div id="result_matrix" style="margin-top:50px">
+            </div>
+        </div>
+        <footer class="footer">
+            <p style="text-align:center">&copy; MCS IPB 2017</p>
+        </footer>
+    </div>
+    <script>
+        function restart(){
+            clear();
+            GridBuilder.computeOptimal();
+        }
+
+        function reset(){
+            var type = $('#type').val('local');
+            var seq1 = $('#seq1').val('attgctcgttgga');
+            var seq2 = $('#seq2').val('aaaaccgtaa');
+            var matchScore = parseInt($('#match').val('2'));
+            var mismatchScore = parseInt($('#missmatch').val('-1'));
+            var gapScore = parseInt($('#gap').val('-1'));
+
+            clear();
+            GridBuilder.computeOptimal();
+        }
+        
+        function clear(){
+            var result_matrix = $('#result_matrix');
+            var result = $('#result');
+            var type = $('#type').val();
+            var seq1 = $('#seq1').val();
+            var seq2 = $('#seq2').val();
+            var matchScore = parseInt($('#match').val());
+            var mismatchScore = parseInt($('#missmatch').val());
+            var gapScore = parseInt($('#gap').val());
+            
+            if(type=="local"){
+                GridBuilder.rebuildTableLocal(result_matrix, result, matchScore, mismatchScore, gapScore, seq2, seq1);
+            }
+            else{
+                GridBuilder.rebuildTableGlobal(result_matrix, result, matchScore, mismatchScore, gapScore, seq2, seq1);
+            }     
+        }
+        
+        $(document).ready(function(){
+            restart();
+            $('.seq').keyup(function(){
+                restart();
+            });
+            $('#type').change(function(){
+                restart();
+            });
+            $('#match').change(function(){
+                restart();
+            });
+            $('#missmatch').change(function(){
+                restart();
+            });
+            $('#gap').change(function(){
+                restart();
+            });
+            $('#btnReset').click(function(){
+                reset();
+            });
+            $('#btnCompute').click(function(){
+                restart();
+            });
+        });
+    </script>
+</body>
+</html>
